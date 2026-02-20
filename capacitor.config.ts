@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.milon.multimedia',
-  appName: 'Love Multimedia',
+  appId: 'com.lovemultimedia.app',
+  appName: 'Unfinished Love Multimedia',
   webDir: 'build'
 };
 

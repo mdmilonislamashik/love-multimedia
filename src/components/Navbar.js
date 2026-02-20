@@ -1,127 +1,155 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
-// আপনার পেজগুলো ইম্পোর্ট করুন
-import Home from './Home';
-import About from './About';
-import Contact from './Contact';
-import Multimedia from './multimedia'; 
-import WorldFilm from './WorldFlim'; 
-import Services from './Services'; 
-import MyProjects from './My Projects'; 
+const Navbar = ({ setIsLoading }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
-function App() {
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 1024;
+      setIsMobile(mobile);
+      if (!mobile) setIsOpen(false);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // মেনু ওপেন থাকলে ব্যাকগ্রাউন্ড স্ক্রল বন্ধ রাখা
+  useEffect(() => {
+    if (isOpen && isMobile) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+  }, [isOpen, isMobile]);
+
+  const handleLinkClick = () => {
+    if (setIsLoading) setIsLoading(true);
+    setIsOpen(false);
+  };
+
+  const getLinkStyle = (bgColor, borderCol) => ({
+    color: 'white',
+    textDecoration: 'none',
+    fontSize: isMobile ? '16px' : '13px',
+    fontWeight: '600',
+    padding: isMobile ? '15px 20px' : '10px 15px',
+    borderRadius: '8px',
+    background: bgColor || '#222',
+    borderBottom: `4px solid ${borderCol || '#000'}`,
+    textAlign: isMobile ? 'left' : 'center',
+    display: 'block',
+    margin: isMobile ? '12px 20px' : '0 5px',
+    transition: '0.3s',
+    whiteSpace: 'nowrap',
+    boxShadow: isMobile ? '0 4px 6px rgba(0,0,0,0.3)' : 'none'
+  });
+
   return (
-    <Router>
-      <div style={{ backgroundColor: '#0a0a0a', minHeight: '100vh', color: 'white' }}>
-        
-        {/* --- Navbar Start --- */}
-        <nav style={styles.navbar}>
-          <div style={styles.logo}>MILON.DEV</div>
-          
-          <div style={styles.navLinks}>
-            <Link to="/" style={styles.link3d}>Home</Link>
-            <Link to="/about" style={styles.link3d}>About</Link>
-            
-            {/* Services Button */}
-            <Link to="/services" style={styles.servicesBtn}>Services</Link>
-            
-            {/* My Projects Button (Green Style) */}
-            <Link to="/projects" style={styles.myProjectsBtn}>My Projects</Link> 
-            
-            <Link to="/multimedia" style={styles.link3d}>Multimedia</Link>
-            <Link to="/world-film" style={styles.worldFilmBtn}>World Film</Link>
-            <Link to="/contact" style={styles.link3d}>Contact</Link>
-          </div>
-        </nav>
-        {/* --- Navbar End --- */}
+    <>
+      {/* ১. Overlay: মেনু ওপেন হলে মেইন পেজ ঝাপসা এবং ডার্ক হবে */}
+      {isMobile && isOpen && (
+        <div 
+          onClick={() => setIsOpen(false)} 
+          style={styles.overlay}
+        />
+      )}
 
-        {/* --- Routes Configuration --- */}
-        <div style={{ padding: '20px' }}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/projects" element={<MyProjects />} /> 
-            <Route path="/multimedia" element={<Multimedia />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/world-film" element={<WorldFilm />} />
-          </Routes>
+      <nav style={styles.navbar}>
+        <div style={styles.logo}>
+          UNFINISHED <span style={{ color: '#61dafb' }}>LOVE</span>
+          {!isMobile && <span style={{ fontSize: '12px', marginLeft: '5px', opacity: 0.8 }}>MULTIMEDIA</span>}
         </div>
 
-      </div>
-    </Router>
-  );
-}
+        {/* ২. থ্রি-ডট মেনু বাটন (শুধুমাত্র মোবাইলে) */}
+        {isMobile && (
+          <div style={styles.threeDotMenu} onClick={() => setIsOpen(!isOpen)}>
+            <div style={styles.dot}></div>
+            <div style={styles.dot}></div>
+            <div style={styles.dot}></div>
+          </div>
+        )}
 
-// স্টাইল অবজেক্ট
+        {/* ৩. নেভিগেশন ড্রয়ার লিঙ্কসমূহ */}
+        <div style={{
+          ...styles.navLinks,
+          transform: isMobile ? (isOpen ? 'translateX(0)' : 'translateX(100%)') : 'none',
+          flexDirection: isMobile ? 'column' : 'row',
+          position: isMobile ? 'fixed' : 'static',
+          top: 0,
+          right: 0,
+          height: isMobile ? '100vh' : 'auto',
+          width: isMobile ? '280px' : 'auto',
+          background: isMobile ? '#111' : 'transparent',
+          paddingTop: isMobile ? '80px' : '0',
+          boxShadow: isMobile && isOpen ? '-10px 0 20px rgba(0,0,0,0.8)' : 'none',
+          display: isMobile ? 'flex' : 'flex'
+        }}>
+          <Link to="/" style={getLinkStyle('#333', '#111')} onClick={handleLinkClick}>Home</Link>
+          <Link to="/about" style={getLinkStyle('#222', '#000')} onClick={handleLinkClick}>About</Link>
+          <Link to="/services" style={getLinkStyle('#007bff', '#0056b3')} onClick={handleLinkClick}>Services</Link>
+          <Link to="/projects" style={getLinkStyle('#28a745', '#1e7e34')} onClick={handleLinkClick}>Projects</Link>
+          <Link to="/multimedia" style={getLinkStyle('#fd7e14', '#a04e0a')} onClick={handleLinkClick}>Multimedia</Link>
+          <Link to="/world-film" style={getLinkStyle('#ff3c3c', '#8b0000')} onClick={handleLinkClick}>World Film</Link>
+          <Link to="/contact" style={getLinkStyle('#17a2b8', '#0e6675')} onClick={handleLinkClick}>Contact</Link>
+        </div>
+      </nav>
+    </>
+  );
+};
+
 const styles = {
   navbar: { 
     display: 'flex', 
     justifyContent: 'space-between', 
-    alignItems: 'center',
-    padding: '15px 30px', 
-    background: '#161616', 
-    borderBottom: '2px solid #333',
-    boxShadow: '0px 4px 10px rgba(0,0,0,0.5)',
-    flexWrap: 'wrap'
+    alignItems: 'center', 
+    padding: '0 25px', 
+    background: '#0a0a0a', 
+    borderBottom: '2px solid #222', 
+    position: 'sticky', 
+    top: 0, 
+    zIndex: 1001,
+    height: '70px'
   },
   logo: { 
-    color: '#61dafb', 
+    color: 'white', 
     fontWeight: 'bold', 
-    fontSize: '22px' 
+    fontSize: '18px', 
+    fontFamily: 'sans-serif',
+    zIndex: 1002,
+    letterSpacing: '1px'
+  },
+  threeDotMenu: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+    cursor: 'pointer',
+    padding: '10px',
+    zIndex: 1002
+  },
+  dot: {
+    width: '5px',
+    height: '5px',
+    backgroundColor: '#61dafb',
+    borderRadius: '50%'
+  },
+  overlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    background: 'rgba(0, 0, 0, 0.75)',
+    backdropFilter: 'blur(5px)',
+    zIndex: 1000,
+    transition: '0.3s'
   },
   navLinks: { 
-    display: 'flex', 
-    gap: '10px', 
-    alignItems: 'center', 
-    flexWrap: 'wrap' 
-  },
-  link3d: { 
-    color: 'white', 
-    textDecoration: 'none', 
-    fontSize: '13px', 
-    fontWeight: '600',
-    padding: '6px 12px', 
-    borderRadius: '6px', 
-    background: '#222', 
-    borderBottom: '3px solid #000',
-    display: 'inline-block',
-    transition: '0.2s'
-  },
-  servicesBtn: {
-    color: 'white', 
-    textDecoration: 'none', 
-    fontSize: '13px', 
-    fontWeight: 'bold',
-    padding: '6px 12px', 
-    borderRadius: '6px', 
-    background: '#007bff', 
-    borderBottom: '3px solid #0056b3',
-    display: 'inline-block'
-  },
-  myProjectsBtn: { 
-    color: 'white', 
-    textDecoration: 'none', 
-    fontSize: '13px', 
-    fontWeight: 'bold',
-    padding: '6px 12px', 
-    borderRadius: '6px', 
-    background: '#28a745', 
-    borderBottom: '3px solid #1e7e34',
-    display: 'inline-block'
-  },
-  worldFilmBtn: {
-    color: 'white', 
-    textDecoration: 'none', 
-    fontSize: '13px', 
-    fontWeight: 'bold',
-    padding: '6px 12px', 
-    borderRadius: '6px', 
-    background: '#ff3c3c', 
-    borderBottom: '3px solid #8b0000',
-    display: 'inline-block'
+    transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)', 
+    zIndex: 1001,
+    alignItems: 'stretch'
   }
 };
 
-export default App;
+export default Navbar;

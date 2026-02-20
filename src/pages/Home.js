@@ -11,6 +11,19 @@ const Home = () => {
   const [asteroids, setAsteroids] = useState([]);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
+  // মিলন ইসলামের প্রোফাইল পিকচার লিঙ্ক
+  const profileImg = "https://lh3.googleusercontent.com/d/1OZGT0cJd6oLtqPtvjFL-gN4nU6fd6_qd";
+
+  // ব্রাউজার ট্যাব টাইটেল এবং আইকন (Favicon) পরিবর্তন
+  useEffect(() => {
+    document.title = "Unfinished Love Multimedia"; 
+    const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+    link.type = 'image/x-icon';
+    link.rel = 'shortcut icon';
+    link.href = profileImg;
+    document.getElementsByTagName('head')[0].appendChild(link);
+  }, [profileImg]);
+
   const words = useMemo(() => [
     "Multimedia Expert 🎬", "React Developer ⚛️", 
     "Video Editor 🎥", "UI/UX Designer 🎨"
@@ -25,13 +38,15 @@ const Home = () => {
     else setGreeting('Good Night 🌙');
   }, [time]);
 
+  // মাউস মুভমেন্ট হ্যান্ডেলার (ইন্টারেক্টিভ নেবুলার জন্য)
   const handleMouseMove = (e) => {
     setMousePos({
-      x: (e.clientX / window.innerWidth - 0.5) * 20,
-      y: (e.clientY / window.innerHeight - 0.5) * 20
+      x: (e.clientX / window.innerWidth - 0.5) * 30,
+      y: (e.clientY / window.innerHeight - 0.5) * 30
     });
   };
 
+  // টাইপরাইটার ইফেক্ট
   useEffect(() => {
     const handleTyping = () => {
       const i = loopNum % words.length;
@@ -45,17 +60,16 @@ const Home = () => {
     return () => clearTimeout(timer);
   }, [text, isDeleting, loopNum, typingSpeed, words]);
 
+  // ঘড়ি, ধুমকেতু এবং অ্যাস্টেরয়েড টাইমার
   useEffect(() => {
     const clock = setInterval(() => setTime(new Date().toLocaleTimeString()), 1000);
     
-    // ধুমকেতু জেনারেটর
     const cometTimer = setInterval(() => {
       const id = Date.now();
       setComets(prev => [...prev, { id, top: Math.random() * 40 + '%', dur: '10s' }]);
       setTimeout(() => setComets(prev => prev.filter(c => c.id !== id)), 10500);
     }, 12000);
 
-    // ৩ডি অ্যাস্টেরয়েড জেনারেটর
     const asteroidTimer = setInterval(() => {
       const id = Date.now();
       const colors = ['#5d4037', '#455a64', '#263238', '#4e342e'];
@@ -71,7 +85,11 @@ const Home = () => {
       setTimeout(() => setAsteroids(prev => prev.filter(a => a.id !== id)), 25000);
     }, 6000);
 
-    return () => { clearInterval(clock); clearInterval(cometTimer); clearInterval(asteroidTimer); };
+    return () => { 
+      clearInterval(clock); 
+      clearInterval(cometTimer); 
+      clearInterval(asteroidTimer); 
+    };
   }, []);
 
   const planets = [
@@ -87,35 +105,28 @@ const Home = () => {
 
   return (
     <div onMouseMove={handleMouseMove} style={styles.container}>
-      {/* অসংখ্য তারা (Twinkling Stars) */}
+      {/* ব্যাকগ্রাউন্ড তারা ও ইন্টারেক্টিভ নেবুলা */}
       <div style={styles.starsLayer}></div>
       <div style={styles.starsLayerSlow}></div>
-
-      {/* নেবুলা ক্লাউডস */}
       <div style={{...styles.nebulaBlue, transform: `translate(${mousePos.x}px, ${mousePos.y}px)`}}></div>
       <div style={{...styles.nebulaPurple, transform: `translate(${-mousePos.x}px, ${-mousePos.y}px)`}}></div>
 
-      {/* বড় ধুমকেতু */}
+      {/* স্পেস অবজেক্টস */}
       {comets.map(c => <div key={c.id} style={{...styles.bigComet, top: c.top, animationDuration: c.dur}} />)}
-
-      {/* ৩ডি অ্যাস্টেরয়েড */}
       {asteroids.map(a => (
         <div key={a.id} style={{
           ...styles.asteroid, 
-          top: a.top, 
-          left: a.left, 
-          width: a.size, 
-          height: a.size, 
-          backgroundColor: a.color,
-          animationDuration: a.dur,
-          transform: `rotate(${a.rot})`
+          top: a.top, left: a.left, width: a.size, height: a.size, 
+          backgroundColor: a.color, animationDuration: a.dur, transform: `rotate(${a.rot})`
         }} />
       ))}
 
-      {/* হেডার */}
+      {/* হেডার সেকশন */}
       <div style={styles.topWrapper}>
         <div style={styles.glassHeader}>
-          <div style={styles.logoBadge}>MI</div>
+          <div style={styles.logoBadge}>
+             <img src={profileImg} alt="logo" style={styles.miniAvatar} />
+          </div>
           <div>
             <span style={styles.subGreet}>{greeting}</span>
             <h2 style={styles.mainGreet}>মিলন ভাই! 🚀</h2>
@@ -123,14 +134,14 @@ const Home = () => {
         </div>
         <div style={styles.clockCard}>
           <div style={styles.timeVal}>{time}</div>
-          <div style={styles.stationLabel}>MILON'S COSMOS • UTC+6</div>
+          <div style={styles.stationLabel}>UNFINISHED LOVE MULTIMEDIA • UTC+6</div>
         </div>
       </div>
 
       <div style={styles.mainContent}>
+        {/* সৌরজগৎ এনিমেশন */}
         <div style={styles.universeContainer}>
           <div style={styles.sun}><div style={styles.sunCore}></div></div>
-          <div style={styles.asteroidBelt}></div>
           {planets.map((p, i) => (
             <div key={i} style={{...styles.orbit, width: p.o, height: p.o, animationDuration: p.sp}}>
               <div style={{...styles.planet, width: p.s, height: p.s, backgroundColor: p.c, boxShadow: `0 0 15px ${p.c}aa`}}>
@@ -141,10 +152,13 @@ const Home = () => {
           ))}
         </div>
 
+        {/* প্রোফাইল কার্ড */}
         <div style={styles.profileSection}>
           <div style={styles.smartGlass}>
             <div style={styles.avatarWrapper}>
-                <div style={styles.profileIcon}>M</div>
+                <div style={styles.profileIcon}>
+                   <img src={profileImg} alt="Milon Islam" style={styles.fullAvatar} />
+                </div>
                 <div style={styles.onlineStatus}></div>
             </div>
             <h1 style={styles.profileName}>Milon Islam</h1>
@@ -178,47 +192,38 @@ const Home = () => {
 
 const styles = {
   container: { backgroundColor: '#010103', minHeight: '100vh', overflow: 'hidden', position: 'relative', color: '#fff', fontFamily: "'Segoe UI', Roboto, sans-serif" },
-  
-  // তারার লেয়ার
-  starsLayer: { position: 'absolute', width: '100%', height: '100%', background: 'radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)), radial-gradient(1px 1px at 150px 150px, #fff, rgba(0,0,0,0)), radial-gradient(2px 2px at 300px 100px, #fff, rgba(0,0,0,0))', backgroundSize: '350px 350px', animation: 'twinkle 4s infinite ease-in-out', zIndex: 0 },
-  starsLayerSlow: { position: 'absolute', width: '100%', height: '100%', background: 'radial-gradient(1.5px 1.5px at 50px 80px, #fff, rgba(0,0,0,0)), radial-gradient(1px 1px at 250px 400px, #fff, rgba(0,0,0,0))', backgroundSize: '500px 500px', animation: 'twinkle 7s infinite reverse', zIndex: 0 },
-
+  starsLayer: { position: 'absolute', width: '100%', height: '100%', background: 'radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)), radial-gradient(1px 1px at 150px 150px, #fff, rgba(0,0,0,0))', backgroundSize: '350px 350px', animation: 'twinkle 4s infinite ease-in-out', zIndex: 0 },
+  starsLayerSlow: { position: 'absolute', width: '100%', height: '100%', background: 'radial-gradient(1.5px 1.5px at 50px 80px, #fff, rgba(0,0,0,0))', backgroundSize: '500px 500px', animation: 'twinkle 7s infinite reverse', zIndex: 0 },
   nebulaBlue: { position: 'absolute', width: '800px', height: '800px', background: 'radial-gradient(circle, rgba(0,242,255,0.08) 0%, transparent 70%)', top: '-10%', left: '-10%', zIndex: 1, animation: 'nebulaPulse 8s infinite' },
   nebulaPurple: { position: 'absolute', width: '800px', height: '800px', background: 'radial-gradient(circle, rgba(124,77,255,0.08) 0%, transparent 70%)', bottom: '-10%', right: '-10%', zIndex: 1, animation: 'nebulaPulse 10s infinite reverse' },
-  
   topWrapper: { position: 'relative', zIndex: 10, padding: '40px 60px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   glassHeader: { display: 'flex', alignItems: 'center', gap: '20px', background: 'rgba(255,255,255,0.03)', padding: '15px 30px', borderRadius: '50px', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)' },
-  logoBadge: { width: '45px', height: '45px', background: 'linear-gradient(45deg, #00f2ff, #7c4dff)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: 'bold' },
+  logoBadge: { width: '45px', height: '45px', background: '#000', borderRadius: '50%', overflow: 'hidden', border: '2px solid #00f2ff', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  miniAvatar: { width: '100%', height: '100%', objectFit: 'cover' },
   subGreet: { fontSize: '12px', color: '#00f2ff', letterSpacing: '2px', textTransform: 'uppercase' },
   mainGreet: { margin: 0, fontSize: '22px', fontWeight: '400' },
-
   clockCard: { textAlign: 'right' },
   timeVal: { fontSize: '36px', fontWeight: 'bold', letterSpacing: '2px' },
   stationLabel: { fontSize: '10px', color: '#7c4dff', letterSpacing: '3px' },
-
   mainContent: { display: 'flex', justifyContent: 'space-around', alignItems: 'center', height: '70vh', position: 'relative', zIndex: 5 },
-
   universeContainer: { position: 'relative', width: '550px', height: '550px', display: 'flex', justifyContent: 'center', alignItems: 'center' },
   sun: { width: '80px', height: '80px', borderRadius: '50%', background: 'radial-gradient(circle, #ffeb3b, #f57c00)', zIndex: 5, animation: 'sunGlow 5s infinite ease-in-out' },
   orbit: { position: 'absolute', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '50%', animation: 'orbit linear infinite' },
   planet: { position: 'absolute', top: '50%', left: '-10px', borderRadius: '50%', transform: 'translateY(-50%)' },
   ring: { position: 'absolute', width: '240%', height: '4px', background: 'rgba(255,255,255,0.15)', borderRadius: '50%', top: '50%', left: '-70%', transform: 'rotateX(75deg)' },
-
   profileSection: { zIndex: 10 },
   smartGlass: { width: '360px', background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(30px)', padding: '50px 40px', borderRadius: '40px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' },
-  avatarWrapper: { position: 'relative', width: '90px', height: '90px', margin: '0 auto 25px' },
-  profileIcon: { width: '100%', height: '100%', background: 'rgba(255,255,255,0.05)', borderRadius: '50%', border: '2px solid #00f2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '35px', color: '#00f2ff' },
-  onlineStatus: { position: 'absolute', bottom: '5px', right: '5px', width: '15px', height: '15px', background: '#00ff00', borderRadius: '50%', border: '3px solid #020205' },
+  avatarWrapper: { position: 'relative', width: '120px', height: '120px', margin: '0 auto 25px' },
+  profileIcon: { width: '100%', height: '100%', background: '#000', borderRadius: '50%', border: '2px solid #00f2ff', overflow: 'hidden', boxShadow: '0 0 20px rgba(0,242,255,0.3)' },
+  fullAvatar: { width: '100%', height: '100%', objectFit: 'cover' },
+  onlineStatus: { position: 'absolute', bottom: '10px', right: '10px', width: '18px', height: '18px', background: '#00ff00', borderRadius: '50%', border: '3px solid #020205', zIndex: 11 },
   profileName: { fontSize: '32px', margin: 0, fontWeight: '700' },
   divider: { width: '40px', height: '3px', background: '#7c4dff', margin: '15px auto' },
   typewriterBox: { fontSize: '18px', color: '#ccc', height: '60px' },
   highlightText: { color: '#00f2ff', fontWeight: 'bold' },
   cursor: { color: '#00f2ff', animation: 'blink 0.8s infinite' },
   cvBtn: { width: '100%', marginTop: '20px', padding: '15px', background: 'transparent', border: '2px solid #00f2ff', color: '#00f2ff', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', transition: '0.3s', textTransform: 'uppercase' },
-
   bigComet: { position: 'absolute', width: '300px', height: '2px', background: 'linear-gradient(to left, #00f2ff, transparent)', animation: 'cometFly linear forwards', zIndex: 2 },
-  
-  // ৩ডি অ্যাস্টেরয়েড স্টাইল
   asteroid: { position: 'absolute', borderRadius: '40% 60% 50% 50%', boxShadow: 'inset -10px -10px 20px rgba(0,0,0,0.8), 5px 5px 15px rgba(0,0,0,0.5)', animation: 'asteroidDrift linear forwards', zIndex: 2, opacity: 0 }
 };
 

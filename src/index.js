@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-// নিচের লাইনটি পরিবর্তন করা হয়েছে কারণ App.js আপনার 'pages' ফোল্ডারের ভেতরে আছে
-import App from './pages/App'; 
+import App from './App';
+
+// যদি আপনার src ফোল্ডারে index.css ফাইলটি না থাকে, তবে নিচের লাইনটি ডিলিট করে দিন
+// import './index.css'; 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

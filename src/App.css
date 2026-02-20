@@ -1,3 +1,4 @@
+/* --- ডিফল্ট অ্যাপ স্টাইল --- */
 .App {
   text-align: center;
 }
@@ -34,5 +35,77 @@
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* --- নেভিগেশন মেনু (পিসি বা বড় স্ক্রিন) --- */
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 20px;
+}
+
+.hamburger {
+  display: none; /* পিসিতে ৩-ডট বা হ্যামবার্গার থাকবে না */
+  cursor: pointer;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background-color: white;
+  display: block;
+}
+
+/* --- মোবাইল ভিউ (৭৬৮ পিক্সেলের নিচে) --- */
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex; /* মোবাইলে ৩-ডট বা হ্যামবার্গার দেখাবে */
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    z-index: 1001;
+  }
+
+  .nav-links {
+    display: none; /* শুরুতে মেনু লুকিয়ে থাকবে */
+    flex-direction: column;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.95); /* গাঢ় ব্যাকগ্রাউন্ড */
+    text-align: center;
+    padding-top: 80px;
+    height: 100vh;
+    z-index: 1000;
+  }
+
+  .nav-links.open {
+    display: flex; /* ডটে ক্লিক করলে মেনু পুরো স্ক্রিনে দেখাবে */
+  }
+
+  /* এলিমেন্ট একটার ওপর আরেকটা আসা বন্ধ করতে */
+  .main-container { 
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    overflow-x: hidden; 
+  }
+
+  section {
+    padding: 60px 20px;
+    width: 100%;
+    box-sizing: border-box; 
+    position: relative; 
+    clear: both;
+    display: block; /* কন্টেন্টগুলো আলাদাভাবে দেখাবে */
+  }
+  
+  /* মোবাইলে টেক্সট সাইজ ঠিক করা */
+  h1 {
+    font-size: 22px !important;
   }
 }

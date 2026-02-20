@@ -18,9 +18,9 @@ const Services = () => {
 
   return (
     <div style={styles.container}>
-      {/* হেডিং সেকশন - সফট কালার */}
+      {/* হেডিং সেকশন */}
       <h1 style={styles.heading}>Our <span style={{ color: '#48bb78' }}>Services</span></h1>
-      <p style={styles.subText}>আমরা চোখের আরাম এবং কাজের গুণমান উভয়কেই প্রাধান্য দিই।</p>
+      <p style={styles.subText}>আমরা চোখের আরাম এবং কাজের গুণমান উভয়কেই প্রাধান্য দিই।</p>
 
       {/* সার্ভিস গ্রিড */}
       <div style={styles.grid}>
@@ -29,10 +29,12 @@ const Services = () => {
                onMouseOver={(e) => {
                  e.currentTarget.style.backgroundColor = '#1a1a1a';
                  e.currentTarget.style.borderColor = '#2d3748';
+                 e.currentTarget.style.transform = 'translateY(-5px)';
                }}
                onMouseOut={(e) => {
                  e.currentTarget.style.backgroundColor = '#121212';
                  e.currentTarget.style.borderColor = '#1a202c';
+                 e.currentTarget.style.transform = 'translateY(0)';
                }}>
             <div style={styles.icon}>{service.icon}</div>
             <h3 style={styles.cardTitle}>{service.title}</h3>
@@ -48,7 +50,9 @@ const Services = () => {
       <h2 style={styles.heading}>Service <span style={{ color: '#4a5568' }}>Tiers</span></h2>
       <div style={styles.pricingGrid}>
         {pricingPlans.map((item, index) => (
-          <div key={index} style={styles.priceCard}>
+          <div key={index} style={styles.priceCard}
+               onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+               onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}>
             <h4 style={{ color: '#a0aec0', marginBottom: '10px' }}>{item.plan}</h4>
             <h2 style={{ fontSize: '32px', color: '#cbd5e0' }}>{item.price}</h2>
             <ul style={styles.featureList}>
@@ -64,101 +68,103 @@ const Services = () => {
 
 const styles = {
   container: {
-    padding: '60px 20px',
+    padding: '40px 10px',
     textAlign: 'center',
-    minHeight: '100vh',
-    backgroundColor: '#0d1117', // Deep Dark Navy - চোখের জন্য ভালো
-    color: '#8b949e' // হালকা অ্যাশ কালার টেক্সট
+    backgroundColor: 'transparent', // App.js এর ব্যাকগ্রাউন্ড ব্যবহার করবে
+    color: '#8b949e'
   },
   heading: {
-    fontSize: '36px',
+    fontSize: '32px',
     marginBottom: '15px',
     fontWeight: '800',
-    color: '#e6edf3', // একদম সাদা নয়, কিছুটা সফট হোয়াইট
+    color: '#e6edf3',
     letterSpacing: '1px'
   },
   subText: {
     color: '#8b949e',
-    marginBottom: '60px',
-    fontSize: '16px',
-    maxWidth: '600px',
-    margin: '0 auto 60px'
+    marginBottom: '50px',
+    fontSize: '15px',
+    maxWidth: '500px',
+    margin: '0 auto 50px'
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: '25px',
-    maxWidth: '1100px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+    gap: '20px',
+    maxWidth: '1000px',
     margin: '0 auto'
   },
   card: {
-    backgroundColor: '#121212', // Deep Matte Black
-    padding: '40px 30px',
+    backgroundColor: '#121212',
+    padding: '30px 20px',
     borderRadius: '15px',
-    border: '1px solid #1a202c', // খুব সূক্ষ্ম বর্ডার
+    border: '1px solid #1a202c',
     transition: '0.3s ease',
     textAlign: 'center',
-    boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
+    boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
   },
   icon: {
-    fontSize: '45px',
-    marginBottom: '20px',
-    opacity: '0.8'
+    fontSize: '40px',
+    marginBottom: '15px',
+    opacity: '0.9'
   },
   cardTitle: {
     color: '#cbd5e0',
-    fontSize: '22px',
-    marginBottom: '12px'
+    fontSize: '20px',
+    marginBottom: '10px'
   },
   cardDesc: {
     color: '#718096',
-    fontSize: '14px',
+    fontSize: '13px',
     lineHeight: '1.6',
-    marginBottom: '20px'
+    marginBottom: '15px'
   },
   cardLink: {
-    color: '#48bb78', // সফট গ্রিন
+    color: '#48bb78',
     textDecoration: 'none',
-    fontSize: '14px',
+    fontSize: '13px',
     fontWeight: '600'
   },
   divider: {
-    margin: '80px auto',
-    width: '100px',
+    margin: '60px auto',
+    width: '60px',
     height: '2px',
-    backgroundColor: '#1a202c'
+    backgroundColor: '#2d3748'
   },
   pricingGrid: {
     display: 'flex',
     justifyContent: 'center',
-    gap: '40px',
-    flexWrap: 'wrap'
+    gap: '25px',
+    flexWrap: 'wrap',
+    marginTop: '30px'
   },
   priceCard: {
     backgroundColor: '#0d1117',
-    padding: '40px',
+    padding: '30px',
     borderRadius: '20px',
     border: '1px solid #30363d',
-    width: '260px',
-    transition: 'transform 0.3s ease'
+    width: '240px',
+    transition: '0.3s ease',
+    boxShadow: '0 10px 20px rgba(0,0,0,0.4)'
   },
   featureList: {
     listStyle: 'none',
     padding: 0,
-    margin: '30px 0',
+    margin: '25px 0',
     color: '#8b949e',
     textAlign: 'left',
-    fontSize: '14px'
+    fontSize: '13px'
   },
   priceBtn: {
     display: 'inline-block',
-    padding: '10px 30px',
-    backgroundColor: '#238636', // ডার্ক গ্রিন বাটন
+    padding: '10px 25px',
+    backgroundColor: '#238636',
     color: '#fff',
     borderRadius: '6px',
     textDecoration: 'none',
     fontWeight: 'bold',
-    fontSize: '14px'
+    fontSize: '13px',
+    transition: '0.2s'
   }
 };
 
