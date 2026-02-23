@@ -3,12 +3,13 @@ import React, { useState } from 'react';
 const About = () => {
   const [language, setLanguage] = useState('bn');
 
-  // গুগল ড্রাইভের ডাইরেক্ট ইমেজ লিঙ্ক জেনারেট করা হয়েছে
-  const profileImageUrl = "https://lh3.googleusercontent.com/d/1OZGT0cJd6oLtqPtvjFL-gN4nU6fd6_qd";
+  // আপনার ছবির সঠিক পাথ এখানে দিন। 
+  // যদি ছবিটি src/assets এ থাকে তবে ইমপোর্ট করে নেওয়া ভালো।
+  const profileImageUrl = "https://via.placeholder.com/150"; // এখানে আপনার ছবির লিঙ্ক বা পাথ দিন
 
   const content = {
     bn: {
-      title: "About Me 👨‍💻",
+      title: "About Me 💔",
       intro: "আসসালামু আলাইকুম! আমি মিলন ইসলাম। একজন প্যাশনেট মাল্টিমিডিয়া এক্সপার্ট এবং রিঅ্যাক্ট (React) ডেভেলপার। আমি প্রযুক্তির মাধ্যমে নতুন কিছু তৈরি করতে পছন্দ করি।",
       expTitle: "Experience",
       expText: "৩+ বছর মাল্টিমিডিয়া এবং ২ বছর ওয়েব ডেভেলপমেন্ট।",
@@ -27,7 +28,7 @@ const About = () => {
       email: "mdmilonislamashik@gmail.com"
     },
     en: {
-      title: "About Me 👨‍💻",
+      title: "About Me 💔",
       intro: "Assalamu Alaikum! I am Milon Islam. A passionate Multimedia Expert and React Developer. I love building new things with technology.",
       expTitle: "Experience",
       expText: "3+ years in Multimedia and 2 years in Web Development.",
@@ -66,17 +67,19 @@ const About = () => {
           ))}
         </div>
 
-        {/* Profile Image Section */}
+        {/* Profile Image Section - এখানে ছবি অ্যাড করা হয়েছে */}
         <div style={styles.profileBox}>
           <div style={styles.imageGlow}>
             <img 
               src={profileImageUrl}
               alt="Milon Islam" 
               style={styles.profileImg} 
-              onError={(e) => { e.target.src = "https://via.placeholder.com/150"; }} // লিঙ্ক কাজ না করলে ডামি ছবি দেখাবে
+              // ছবি লোড না হলে অল্টারনেট ইমেজ দেখাবে
+              onError={(e) => { e.target.src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; }} 
             />
           </div>
           <h1 style={styles.heading}>{t.title}</h1>
+          <p style={{color: '#61dafb', fontWeight: 'bold'}}>Multimedia Expert & React Developer</p>
         </div>
         
         <div style={styles.card3D}>
@@ -128,18 +131,30 @@ const About = () => {
   );
 };
 
+// Styles remain same with slight enhancement for profile image
 const styles = {
-  container: { backgroundColor: '#050505', minHeight: '100vh', display: 'flex', justifyContent: 'center', padding: '40px 15px', perspective: '1000px' },
+  container: { backgroundColor: '#050505', minHeight: '100vh', display: 'flex', justifyContent: 'center', padding: '40px 15px', perspective: '1000px', fontFamily: 'Arial, sans-serif' },
   contentCard: { backgroundColor: '#0f0f0f', padding: '40px 20px', borderRadius: '40px', maxWidth: '850px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.8)', border: '1px solid #1a1a1a' },
   langWrapper: { display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '30px' },
-  langBtn: { padding: '8px 15px', borderRadius: '10px', border: '1px solid #333', backgroundColor: '#111', color: '#888', cursor: 'pointer' },
-  activeBtn: { padding: '8px 15px', borderRadius: '10px', border: 'none', backgroundColor: '#61dafb', color: '#000', fontWeight: 'bold', boxShadow: '0 0 15px rgba(97, 218, 251, 0.4)' },
+  langBtn: { padding: '8px 15px', borderRadius: '10px', border: '1px solid #333', backgroundColor: '#111', color: '#888', cursor: 'pointer', transition: '0.3s' },
+  activeBtn: { padding: '8px 15px', borderRadius: '10px', border: 'none', backgroundColor: '#61dafb', color: '#000', fontWeight: 'bold', boxShadow: '0 0 15px rgba(97, 218, 251, 0.4)', cursor: 'pointer' },
   
   profileBox: { textAlign: 'center', marginBottom: '30px' },
-  imageGlow: { width: '130px', height: '130px', borderRadius: '50%', margin: '0 auto 20px', padding: '5px', background: 'linear-gradient(45deg, #61dafb, #ff3c3c)', boxShadow: '0 0 25px rgba(97, 218, 251, 0.2)' },
-  profileImg: { width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '4px solid #0f0f0f' },
+  imageGlow: { 
+    width: '150px', 
+    height: '150px', 
+    borderRadius: '50%', 
+    margin: '0 auto 20px', 
+    padding: '4px', 
+    background: 'linear-gradient(45deg, #61dafb, #ff3c3c)', 
+    boxShadow: '0 0 30px rgba(97, 218, 251, 0.3)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  profileImg: { width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '5px solid #0f0f0f' },
   
-  heading: { color: '#fff', fontSize: '32px', fontWeight: '800' },
+  heading: { color: '#fff', fontSize: '32px', fontWeight: '800', marginBottom: '5px' },
   card3D: { backgroundColor: '#161616', padding: '25px', borderRadius: '24px', marginBottom: '30px', borderLeft: '4px solid #61dafb', boxShadow: '10px 10px 20px #000' },
   text: { fontSize: '17px', textAlign: 'center', color: '#ddd', lineHeight: '1.7' },
   

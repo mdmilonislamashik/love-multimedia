@@ -29,7 +29,7 @@ const Contact = () => {
             <div style={styles.icon}>📍</div>
             <div>
               <h4 style={styles.infoTitle}>Location</h4>
-              <p style={styles.infoText}>Ullapara, Sirajganj, Dhaka, Bangladesh</p>
+              <p style={styles.infoText}>Shyamkhali, Koyra, Khulna, BD</p>
             </div>
           </div>
 

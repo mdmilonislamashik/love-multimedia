@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { supabase } from './supabaseClient';
 import './App.css';
 
 // পেজ ইম্পোর্ট
@@ -10,6 +11,8 @@ import Multimedia from './pages/multimedia';
 import WorldFilm from './pages/WorldFlim'; 
 import Services from './pages/Services'; 
 import MyProjects from './pages/MyProjects'; 
+import ULMPersonal from './pages/ULMPersonal'; 
+import Auth from './pages/Auth'; 
 
 // --- Loading Component ---
 const LoadingScreen = () => (
@@ -51,14 +54,11 @@ function Navbar({ setIsLoading }) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // মোবাইল মেনু ওপেন থাকলে পেজ স্ক্রল বন্ধ রাখা
-  useEffect(() => {
-    if (isOpen && isMobile) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-  }, [isOpen, isMobile]);
+  // --- LOGOUT FUNCTION ---
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) alert(error.message);
+  };
 
   const handleNavLinkClick = () => {
     setIsLoading(true);
@@ -113,7 +113,6 @@ function Navbar({ setIsLoading }) {
         `}
       </style>
 
-      {/* মোবাইল মেনু খোলা থাকলে পেজ হাইড করার ওভারলে */}
       {isMobile && isOpen && <div className="overlay-blur" onClick={() => setIsOpen(false)} />}
 
       <nav style={styles.navbar}>
@@ -128,7 +127,6 @@ function Navbar({ setIsLoading }) {
           <div className="animated-logo">UNFINISHED LOVE MULTIMEDIA</div>
         </div>
         
-        {/* নেভিগেশন লিঙ্কস (মোবাইলে স্লাইড ড্রয়ার, পিসিতে রো) */}
         <div style={{
           ...styles.navLinks,
           transform: isMobile ? (isOpen ? 'translateX(0)' : 'translateX(100%)') : 'none',
@@ -141,7 +139,8 @@ function Navbar({ setIsLoading }) {
           paddingTop: isMobile ? '80px' : '0',
           boxShadow: isMobile && isOpen ? '-5px 0 20px rgba(0,0,0,0.8)' : 'none',
           zIndex: 1001,
-          display: 'flex'
+          display: 'flex',
+          overflowY: isMobile ? 'auto' : 'visible'
         }}>
           {isMobile ? (
             <>
@@ -151,7 +150,8 @@ function Navbar({ setIsLoading }) {
               <Link to="/projects" onClick={handleNavLinkClick} style={getMobileLinkStyle('#28a745', '#1e7e34')}>Projects</Link>
               <Link to="/multimedia" onClick={handleNavLinkClick} style={getMobileLinkStyle('#fd7e14', '#a04e0a')}>Multimedia</Link>
               <Link to="/world-film" onClick={handleNavLinkClick} style={getMobileLinkStyle('#ff3c3c', '#8b0000')}>World Film</Link>
-              <Link to="/contact" onClick={handleNavLinkClick} style={getMobileLinkStyle('#17a2b8', '#0e6675')}>Contact</Link>
+              <Link to="/contact" onClick={handleNavLinkClick} style={getMobileLinkStyle('#17a2b8', '#116a7b')}>Contact</Link>
+              <button onClick={handleLogout} style={{...getMobileLinkStyle('#ff4b2b', '#9e2a2a'), border: 'none', textAlign: 'left', cursor: 'pointer', width: 'calc(100% - 40px)'}}>Logout</button>
             </>
           ) : (
             <>
@@ -162,6 +162,7 @@ function Navbar({ setIsLoading }) {
               <Link to="/multimedia" onClick={handleNavLinkClick} style={getActiveStyle('/multimedia', styles.multimediaBtn)}>Multimedia</Link>
               <Link to="/world-film" onClick={handleNavLinkClick} style={getActiveStyle('/world-film', styles.worldFilmBtn)}>World Film</Link>
               <Link to="/contact" onClick={handleNavLinkClick} style={getActiveStyle('/contact', styles.contactBtn)}>Contact</Link>
+              <button onClick={handleLogout} style={styles.logoutBtn}>Logout</button>
             </>
           )}
         </div>
@@ -170,7 +171,7 @@ function Navbar({ setIsLoading }) {
   );
 }
 
-// --- App Content Component ---
+// --- App Content (Protected Area) ---
 function AppContent() {
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
@@ -184,6 +185,7 @@ function AppContent() {
   const getPageTheme = () => {
     switch (location.pathname) {
       case '/': return { bg: '#1a1a2e', card: '#16213e', border: '#61dafb' };
+      case '/personal': return { bg: '#250025', card: '#3d003d', border: '#e83e8c' };
       case '/about': return { bg: '#2d142c', card: '#510a32', border: '#c72c41' };
       case '/services': return { bg: '#0f3443', card: '#112d32', border: '#24fe41' };
       case '/projects': return { bg: '#1d1d1d', card: '#333333', border: '#28a745' };
@@ -222,6 +224,7 @@ function AppContent() {
         }}>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/personal" element={<ULMPersonal />} />
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
             <Route path="/projects" element={<MyProjects />} />
@@ -235,10 +238,31 @@ function AppContent() {
   );
 }
 
+// --- Main App Entry (Auth Handling) ---
 export default function App() {
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // বর্তমান সেশন চেক
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    // সেশন পরিবর্তন শুনুন (Login/Logout/Register)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) return <LoadingScreen />;
+
   return (
     <Router>
-      <AppContent />
+      {!session ? <Auth /> : <AppContent />}
     </Router>
   );
 }
@@ -266,5 +290,12 @@ const styles = {
   projectsBtn: { ...baseLinkStyle, background: '#28a745' },
   multimediaBtn: { ...baseLinkStyle, background: '#fd7e14' },
   worldFilmBtn: { ...baseLinkStyle, background: '#ff3c3c' },
-  contactBtn: { ...baseLinkStyle, background: '#17a2b8' },
+  contactBtn: { ...baseLinkStyle, background: '#17a2b8' }, 
+  logoutBtn: { 
+    ...baseLinkStyle, 
+    background: '#ff4b2b', 
+    border: 'none', 
+    cursor: 'pointer', 
+    marginLeft: '5px' 
+  },
 };
