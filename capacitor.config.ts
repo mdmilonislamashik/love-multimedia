@@ -1,9 +1,12 @@
-import type { CapacitorConfig } from '@capacitor/cli';
+import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.lovemultimedia.app',
-  appName: 'Unfinished Love Multimedia',
-  webDir: 'build'
+  appName: 'Love Multimedia',
+  webDir: 'build',
+  server: {
+    androidScheme: 'https'
+  }
 };
 
 export default config;

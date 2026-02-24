@@ -1,4 +1,4 @@
-package com.milon.multimedia;
+package com.lovemultimedia.app;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -6,19 +6,19 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // গুগল লগইন ফাংশন
+  // গুগল লগইন ফাংশন - আপনার Vercel Link এখানে যুক্ত করা হয়েছে
   const handleGoogleLogin = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        // আপনার সুপাবেস কলব্যাক ইউআরএল এবং গুগল কনসোলে এই ইউআরএলটি থাকতে হবে
-        redirectTo: window.location.origin 
+        // গুগল লগইন সফল হওয়ার পর এই লিঙ্কে ফিরে আসবে
+        redirectTo: 'https://love-multimedia-mw02v9he6-mdmilonislamashiks-projects.vercel.app'
       }
     });
     if (error) alert("Google Login Error: " + error.message);
   };
 
-  // ইমেইল দিয়ে লগইন
+  // ইমেইল দিয়ে লগইন
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !password) return alert("Please fill in all fields");
@@ -29,7 +29,7 @@ const Auth = () => {
     setLoading(false);
   };
 
-  // ইমেইল দিয়ে রেজিস্ট্রেশন
+  // ইমেইল দিয়ে রেজিস্ট্রেশন
   const handleSignUp = async (e) => {
     e.preventDefault();
     if (!email || !password) return alert("Please fill in all fields");
@@ -64,7 +64,7 @@ const Auth = () => {
           <span style={authStyles.dividerText}>OR</span>
         </div>
 
-        {/* ইমেইল ও পাসওয়ার্ড ফর্ম */}
+        {/* ইমেইল ও পাসওয়ার্ড ফর্ম */}
         <form style={authStyles.form}>
           <input 
             type="email" 
@@ -107,7 +107,7 @@ const Auth = () => {
   );
 };
 
-// সিএসএস স্টাইল (একই ফাইলে রাখা হয়েছে সুবিধার জন্য)
+// স্টাইল অবজেক্ট
 const authStyles = {
   container: { 
     display: 'flex', 

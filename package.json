@@ -1,6 +1,6 @@
 {
-  "name": "love-multimedia",
-  "version": "0.1.0",
+  "name": "ul-multimedia",
+  "version": "5.0.0",
   "private": true,
   "dependencies": {
     "@capacitor/android": "^8.1.0",
