@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
 import './App.css';
 
@@ -42,9 +42,16 @@ const LoadingScreen = () => (
 function Navbar({ setIsLoading }) {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
   useEffect(() => {
+    const getUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUserData();
+
     const handleResize = () => {
       const mobile = window.innerWidth <= 1024;
       setIsMobile(mobile);
@@ -54,7 +61,6 @@ function Navbar({ setIsLoading }) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // --- LOGOUT FUNCTION ---
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) alert(error.message);
@@ -85,6 +91,24 @@ function Navbar({ setIsLoading }) {
     display: 'block',
     transition: '0.3s'
   });
+
+  // --- নতুন প্রিমিয়াম প্রোফাইল সেকশন ---
+  const UserProfile = () => (
+    <div style={styles.profileWrapper} title="User Profile">
+      <div style={styles.profileInfo}>
+        <span style={styles.userName}>{user?.user_metadata?.full_name || "Milon Islam"}</span>
+        <span style={styles.userStatus}>Online</span>
+      </div>
+      <div style={styles.avatarContainer}>
+        <img 
+          src={user?.user_metadata?.avatar_url || "https://ui-avatars.com/api/?name=" + (user?.user_metadata?.full_name || user?.email) + "&background=random"} 
+          alt="Profile" 
+          style={styles.profilePic} 
+        />
+        <div style={styles.onlineBadge}></div>
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -140,31 +164,31 @@ function Navbar({ setIsLoading }) {
           boxShadow: isMobile && isOpen ? '-5px 0 20px rgba(0,0,0,0.8)' : 'none',
           zIndex: 1001,
           display: 'flex',
+          alignItems: isMobile ? 'stretch' : 'center',
           overflowY: isMobile ? 'auto' : 'visible'
         }}>
-          {isMobile ? (
-            <>
-              <Link to="/" onClick={handleNavLinkClick} style={getMobileLinkStyle('#333', '#111')}>Home</Link>
-              <Link to="/about" onClick={handleNavLinkClick} style={getMobileLinkStyle('#6f42c1', '#4b2d86')}>About</Link>
-              <Link to="/services" onClick={handleNavLinkClick} style={getMobileLinkStyle('#007bff', '#0056b3')}>Services</Link>
-              <Link to="/projects" onClick={handleNavLinkClick} style={getMobileLinkStyle('#28a745', '#1e7e34')}>Projects</Link>
-              <Link to="/multimedia" onClick={handleNavLinkClick} style={getMobileLinkStyle('#fd7e14', '#a04e0a')}>Multimedia</Link>
-              <Link to="/world-film" onClick={handleNavLinkClick} style={getMobileLinkStyle('#ff3c3c', '#8b0000')}>World Film</Link>
-              <Link to="/contact" onClick={handleNavLinkClick} style={getMobileLinkStyle('#17a2b8', '#116a7b')}>Contact</Link>
-              <button onClick={handleLogout} style={{...getMobileLinkStyle('#ff4b2b', '#9e2a2a'), border: 'none', textAlign: 'left', cursor: 'pointer', width: 'calc(100% - 40px)'}}>Logout</button>
-            </>
-          ) : (
-            <>
-              <Link to="/" onClick={handleNavLinkClick} style={getActiveStyle('/', styles.homeBtn)}>Home</Link>
-              <Link to="/about" onClick={handleNavLinkClick} style={getActiveStyle('/about', styles.aboutBtn)}>About</Link>
-              <Link to="/services" onClick={handleNavLinkClick} style={getActiveStyle('/services', styles.servicesBtn)}>Services</Link>
-              <Link to="/projects" onClick={handleNavLinkClick} style={getActiveStyle('/projects', styles.projectsBtn)}>My Projects</Link>
-              <Link to="/multimedia" onClick={handleNavLinkClick} style={getActiveStyle('/multimedia', styles.multimediaBtn)}>Multimedia</Link>
-              <Link to="/world-film" onClick={handleNavLinkClick} style={getActiveStyle('/world-film', styles.worldFilmBtn)}>World Film</Link>
-              <Link to="/contact" onClick={handleNavLinkClick} style={getActiveStyle('/contact', styles.contactBtn)}>Contact</Link>
-              <button onClick={handleLogout} style={styles.logoutBtn}>Logout</button>
-            </>
+          
+          {/* মোবাইল মেনুর শীর্ষে প্রোফাইল */}
+          {isMobile && user && (
+            <div style={{ padding: '0 20px 20px 20px', borderBottom: '1px solid #222', marginBottom: '10px' }}>
+               <UserProfile />
+            </div>
           )}
+
+          <Link to="/" onClick={handleNavLinkClick} style={isMobile ? getMobileLinkStyle('#333', '#111') : getActiveStyle('/', styles.homeBtn)}>Home</Link>
+          <Link to="/about" onClick={handleNavLinkClick} style={isMobile ? getMobileLinkStyle('#6f42c1', '#4b2d86') : getActiveStyle('/about', styles.aboutBtn)}>About</Link>
+          <Link to="/services" onClick={handleNavLinkClick} style={isMobile ? getMobileLinkStyle('#007bff', '#0056b3') : getActiveStyle('/services', styles.servicesBtn)}>Services</Link>
+          <Link to="/projects" onClick={handleNavLinkClick} style={isMobile ? getMobileLinkStyle('#28a745', '#1e7e34') : getActiveStyle('/projects', styles.projectsBtn)}>My Projects</Link>
+          <Link to="/multimedia" onClick={handleNavLinkClick} style={isMobile ? getMobileLinkStyle('#fd7e14', '#a04e0a') : getActiveStyle('/multimedia', styles.multimediaBtn)}>Multimedia</Link>
+          <Link to="/world-film" onClick={handleNavLinkClick} style={isMobile ? getMobileLinkStyle('#ff3c3c', '#8b0000') : getActiveStyle('/world-film', styles.worldFilmBtn)}>World Film</Link>
+          <Link to="/contact" onClick={handleNavLinkClick} style={isMobile ? getMobileLinkStyle('#17a2b8', '#116a7b') : getActiveStyle('/contact', styles.contactBtn)}>Contact</Link>
+          
+          {/* ডেস্কটপে লগআউটের আগে প্রোফাইল কার্ড */}
+          {!isMobile && user && <UserProfile />}
+
+          <button onClick={handleLogout} style={isMobile ? getMobileLinkStyle('#ff4b2b', '#9e2a2a') : styles.logoutBtn}>
+            Logout
+          </button>
         </div>
       </nav>
     </>
@@ -201,27 +225,9 @@ function AppContent() {
   return (
     <div style={{ backgroundColor: theme.bg, minHeight: '100vh', color: 'white', transition: 'background-color 0.8s ease' }}>
       <Navbar setIsLoading={setIsLoading} />
-      
       {isLoading && <LoadingScreen />}
-
-      <main style={{ 
-        padding: '15px', 
-        opacity: isLoading ? 0 : 1, 
-        transition: 'all 0.4s ease',
-        display: 'flex',
-        justifyContent: 'center'
-      }}>
-        <div style={{
-          background: theme.card,
-          width: '100%',
-          maxWidth: '1100px',
-          padding: '25px',
-          borderRadius: '12px',
-          borderLeft: `6px solid ${theme.border}`,
-          boxShadow: '0px 10px 40px rgba(0,0,0,0.6)',
-          marginTop: '10px',
-          boxSizing: 'border-box'
-        }}>
+      <main style={{ padding: '15px', opacity: isLoading ? 0 : 1, transition: 'all 0.4s ease', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ background: theme.card, width: '100%', maxWidth: '1100px', padding: '25px', borderRadius: '12px', borderLeft: `6px solid ${theme.border}`, boxShadow: '0px 10px 40px rgba(0,0,0,0.6)', marginTop: '10px', boxSizing: 'border-box' }}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/personal" element={<ULMPersonal />} />
@@ -231,6 +237,7 @@ function AppContent() {
             <Route path="/multimedia" element={<Multimedia />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/world-film" element={<WorldFilm />} />
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
       </main>
@@ -238,23 +245,18 @@ function AppContent() {
   );
 }
 
-// --- Main App Entry (Auth Handling) ---
 export default function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // বর্তমান সেশন চেক
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
     });
-
-    // সেশন পরিবর্তন শুনুন (Login/Logout/Register)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
@@ -267,7 +269,6 @@ export default function App() {
   );
 }
 
-// --- Styles ---
 const baseLinkStyle = { 
   color: 'white', textDecoration: 'none', fontSize: '11px', fontWeight: 'bold', 
   padding: '8px 10px', borderRadius: '6px', transition: 'all 0.3s ease'
@@ -282,8 +283,10 @@ const styles = {
   leftSection: { display: 'flex', alignItems: 'center', gap: '15px' },
   threeDotMenu: { display: 'flex', flexDirection: 'column', gap: '4px', cursor: 'pointer', zIndex: 1200 },
   dot: { width: '5px', height: '5px', backgroundColor: '#61dafb', borderRadius: '50%' },
-  navLinks: { gap: '5px', transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)' },
+  navLinks: { gap: '8px', display: 'flex', alignItems: 'center' },
   loadingContainer: { position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.95)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', zIndex: 9999 },
+  
+  // বাটনের স্টাইল
   homeBtn: { ...baseLinkStyle, background: '#333' },
   aboutBtn: { ...baseLinkStyle, background: '#6f42c1' },
   servicesBtn: { ...baseLinkStyle, background: '#007bff' },
@@ -293,9 +296,61 @@ const styles = {
   contactBtn: { ...baseLinkStyle, background: '#17a2b8' }, 
   logoutBtn: { 
     ...baseLinkStyle, 
-    background: '#ff4b2b', 
-    border: 'none', 
-    cursor: 'pointer', 
-    marginLeft: '5px' 
+    background: 'linear-gradient(45deg, #ff4b2b, #ff3c3c)', 
+    border: 'none', cursor: 'pointer', marginLeft: '10px',
+    boxShadow: '0 4px 12px rgba(255, 75, 43, 0.2)'
   },
+
+  // নতুন প্রোফাইল স্টাইল
+  profileWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '4px 15px',
+    background: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: '50px',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    marginRight: '5px',
+    marginLeft: '10px'
+  },
+  profileInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    lineHeight: '1.1'
+  },
+  userName: {
+    fontSize: '12px',
+    fontWeight: '700',
+    color: '#fff',
+    letterSpacing: '0.3px'
+  },
+  userStatus: {
+    fontSize: '9px',
+    color: '#24fe41',
+    fontWeight: 'bold',
+    textTransform: 'uppercase'
+  },
+  avatarContainer: {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center'
+  },
+  profilePic: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    border: '2px solid #61dafb',
+    objectFit: 'cover'
+  },
+  onlineBadge: {
+    position: 'absolute',
+    bottom: '1px',
+    right: '0px',
+    width: '9px',
+    height: '9px',
+    backgroundColor: '#24fe41',
+    borderRadius: '50%',
+    border: '1px solid #0a0a0a'
+  }
 };
