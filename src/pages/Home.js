@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// কম্পোনেন্ট ইমপোর্ট
+import ProjectShowcase from '../ProjectShowcase';
 // লোগোটি এখানে ইমপোর্ট করা হলো
 import logo from '../assets/logo.png'; 
 
@@ -173,7 +175,7 @@ const Home = () => {
 
       <div style={styles.mainContent} className="main-content-mobile">
         
-        {/* 🪐 3D Solar System Container */}
+        {/* 🪐 3D Solar System */}
         <div style={styles.universeContainer} className="universe-container-mobile">
           <div style={styles.sun}></div>
           {planets.map((p, i) => (
@@ -213,6 +215,11 @@ const Home = () => {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* --- 🚀 Project Showcase Section Added Here --- */}
+      <div style={styles.showcaseWrapper}>
+        <ProjectShowcase />
       </div>
 
       <style>{`
@@ -370,7 +377,15 @@ const styles = {
   profileName: { fontSize: '30px', margin: 0, fontWeight: 'bold' },
   divider: { height: '1px', background: 'linear-gradient(to right, transparent, rgba(0,242,255,0.3), transparent)', margin: '20px 0' },
   highlightText: { color: '#00f2ff', fontWeight: 'bold', fontSize: '20px' },
-  typewriterBox: { height: '60px', fontSize: '18px' }
+  typewriterBox: { height: '60px', fontSize: '18px' },
+
+  // Showcase Section Style
+  showcaseWrapper: {
+    position: 'relative',
+    zIndex: 10,
+    marginTop: '-50px', // মেন কন্টেন্টের সাথে একটু কাছে আনার জন্য
+    paddingBottom: '100px'
+  }
 };
 
 export default Home;
