@@ -8,7 +8,7 @@ export default function Profile({ session, onProfileUpdate }) {
   const [avatarUrl, setAvatarUrl] = useState('');
   const user = session?.user;
 
-  // ডাটাবেস থেকে প্রোফাইল তথ্য নিয়ে আসা
+  // ডাটাবেস থেকে প্রোফাইল তথ্য নিয়ে আসা
   const getProfile = useCallback(async () => {
     try {
       setLoading(true);
@@ -34,7 +34,7 @@ export default function Profile({ session, onProfileUpdate }) {
     getProfile();
   }, [session, getProfile]);
 
-  // ইমেজ আপলোড ফাংশন
+  // ইমেজ আপলোড ফাংশন (সরাসরি ডাটাবেসে আপডেট করার লজিকসহ)
   async function uploadAvatar(event) {
     try {
       setUploading(true);
@@ -47,23 +47,43 @@ export default function Profile({ session, onProfileUpdate }) {
       const fileName = `${user.id}-${Math.random()}.${fileExt}`;
       const filePath = `${fileName}`;
 
+      // ১. ফাইল আপলোড
       let { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-      setAvatarUrl(data.publicUrl);
-      
+      // ২. পাবলিক ইউআরএল জেনারেট
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+
+      if (urlData) {
+        const publicUrl = urlData.publicUrl;
+        setAvatarUrl(publicUrl); // লোকাল স্টেট আপডেট
+
+        // ৩. সরাসরি ডাটাবেসে সেভ (রিফ্রেশ করলে যাতে হারানো না যায়)
+        const { error: dbError } = await supabase
+          .from('profiles')
+          .upsert({ 
+             id: user.id, 
+             avatar_url: publicUrl,
+             updated_at: new Date() 
+          });
+          
+        if (dbError) throw dbError;
+        alert('✅ প্রোফাইল পিকচার আপডেট হয়েছে!');
+        
+        // Navbar বা অন্য কোথাও পরিবর্তন দেখানোর জন্য
+        if (onProfileUpdate) onProfileUpdate();
+      }
     } catch (error) {
-      alert(error.message);
+      alert('Error: ' + error.message);
     } finally {
       setUploading(false);
     }
   }
 
-  // প্রোফাইল তথ্য আপডেট
+  // প্রোফাইল তথ্য আপডেট (নামের জন্য)
   async function updateProfile(e) {
     e.preventDefault();
     try {
@@ -78,9 +98,7 @@ export default function Profile({ session, onProfileUpdate }) {
       let { error } = await supabase.from('profiles').upsert(updates);
       if (error) throw error;
       
-      // Navbar-এ তথ্য আপডেট করার জন্য callback কল করা
       if (onProfileUpdate) onProfileUpdate();
-      
       alert('✅ প্রোফাইল সফলভাবে আপডেট হয়েছে!');
     } catch (error) {
       alert(error.message);
@@ -99,7 +117,6 @@ export default function Profile({ session, onProfileUpdate }) {
       <div style={styles.card}>
         <form onSubmit={updateProfile} style={styles.form}>
           
-          {/* প্রোফাইল পিকচার সেকশন */}
           <div style={styles.avatarContainer}>
             <div style={styles.imageWrapper}>
               <img 
@@ -129,13 +146,11 @@ export default function Profile({ session, onProfileUpdate }) {
           </div>
 
           <div style={styles.formContent}>
-            {/* ইমেইল (Read Only) */}
             <div style={styles.inputGroup}>
               <label style={styles.label}>📧 Email Address</label>
               <input type="text" value={user?.email} disabled style={styles.disabledInput} />
             </div>
 
-            {/* নাম ইনপুট */}
             <div style={styles.inputGroup}>
               <label style={styles.label}>✍️ Full Name</label>
               <input 
@@ -149,7 +164,6 @@ export default function Profile({ session, onProfileUpdate }) {
               />
             </div>
 
-            {/* সেভ বাটন */}
             <button type="submit" disabled={loading} style={styles.saveBtn} className="save-button">
               {loading ? 'Saving...' : 'Save Changes'}
             </button>
@@ -185,18 +199,11 @@ export default function Profile({ session, onProfileUpdate }) {
   );
 }
 
-// আধুনিক ডিজাইন স্টাইলস
 const styles = {
-  container: { 
-    padding: '20px', 
-    maxWidth: '800px', 
-    margin: '0 auto',
-    animation: 'fadeIn 0.5s ease'
-  },
+  container: { padding: '20px', maxWidth: '800px', margin: '0 auto' },
   headerSection: { textAlign: 'center', marginBottom: '30px' },
-  title: { fontSize: '32px', color: '#fff', marginBottom: '8px', fontWeight: '900', letterSpacing: '1px' },
+  title: { fontSize: '32px', color: '#fff', fontWeight: '900' },
   subtitle: { color: '#888', fontSize: '14px' },
-  
   card: {
     background: 'rgba(255, 255, 255, 0.03)',
     backdropFilter: 'blur(10px)',
@@ -205,29 +212,12 @@ const styles = {
     border: '1px solid rgba(255, 255, 255, 0.1)',
     boxShadow: '0 25px 50px rgba(0,0,0,0.4)',
   },
-  
-  form: { 
-    display: 'flex', 
-    flexDirection: 'column', 
-    alignItems: 'center',
-    gap: '30px' 
-  },
-  
+  form: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '30px' },
   avatarContainer: { textAlign: 'center' },
-  imageWrapper: { 
-    position: 'relative', 
-    width: '130px', 
-    height: '130px',
-    margin: '0 auto'
-  },
+  imageWrapper: { position: 'relative', width: '130px', height: '130px', margin: '0 auto' },
   avatarPreview: { 
-    width: '100%', 
-    height: '100%', 
-    borderRadius: '50%', 
-    objectFit: 'cover', 
-    border: '3px solid #61dafb',
-    padding: '5px',
-    background: '#111'
+    width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', 
+    border: '3px solid #61dafb', padding: '5px', background: '#111' 
   },
   imageOverlay: {
     position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
@@ -235,42 +225,25 @@ const styles = {
     alignItems: 'center', justifyContent: 'center'
   },
   editIconBtn: {
-    position: 'absolute', 
-    bottom: '5px', 
-    right: '5px',
-    background: '#61dafb',
-    width: '35px',
-    height: '35px',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    fontSize: '16px',
-    boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
-    border: '3px solid #1a1a1a',
-    transition: '0.3s'
+    position: 'absolute', bottom: '5px', right: '5px', background: '#61dafb',
+    width: '35px', height: '35px', borderRadius: '50%', display: 'flex',
+    alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+    boxShadow: '0 4px 10px rgba(0,0,0,0.3)', border: '3px solid #1a1a1a'
   },
-  
   formContent: { width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '20px' },
   inputGroup: { display: 'flex', flexDirection: 'column', gap: '8px' },
-  label: { fontSize: '12px', color: '#aaa', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', marginLeft: '5px' },
-  
+  label: { fontSize: '12px', color: '#aaa', fontWeight: 'bold', textTransform: 'uppercase' },
   input: {
     padding: '14px 18px', borderRadius: '12px', border: '1px solid #333',
-    background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '15px', 
-    outline: 'none', transition: '0.3s'
+    background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '15px', outline: 'none'
   },
   disabledInput: {
     padding: '14px 18px', borderRadius: '12px', border: '1px solid #222',
     background: 'rgba(0,0,0,0.2)', color: '#555', fontSize: '15px', cursor: 'not-allowed'
   },
-  
   saveBtn: {
     padding: '16px', borderRadius: '12px', border: 'none',
     background: 'linear-gradient(135deg, #61dafb 0%, #21a1f1 100%)',
-    color: '#000', fontWeight: '800', fontSize: '16px',
-    cursor: 'pointer', marginTop: '10px', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    textTransform: 'uppercase', letterSpacing: '1px'
+    color: '#000', fontWeight: '800', fontSize: '16px', cursor: 'pointer'
   }
 };
