@@ -7,7 +7,7 @@ import logo from '../assets/logo.png';
 const Home = () => {
   const navigate = useNavigate();
 
-  // ইমপোর্ট করা লোগোটি profileImg ভেরিয়েবলে সেট করা হলো
+  // ইমপোর্ট করা লোগোটি profileImg ভেরিয়েবলে সেট করা হলো
   const profileImg = logo; 
 
   // --- States ---
@@ -22,9 +22,12 @@ const Home = () => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [showUFO, setShowUFO] = useState(false);
 
+  // Favicon and Title update
   useEffect(() => {
     document.title = "Unfinished Love Multimedia"; 
     const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+    link.type = 'image/x-icon';
+    link.rel = 'shortcut icon';
     link.href = profileImg;
     document.getElementsByTagName('head')[0].appendChild(link);
   }, [profileImg]);
@@ -34,6 +37,7 @@ const Home = () => {
     "Video Editor 🎥", "UI/UX Designer 🎨"
   ], []);
 
+  // Greeting Logic
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour < 12) setGreeting('Good Morning 🌤️');
@@ -49,19 +53,33 @@ const Home = () => {
     });
   }, []);
 
+  // Typing Effect Logic
   useEffect(() => {
     const handleTyping = () => {
       const i = loopNum % words.length;
       const fullText = words[i];
-      setText(isDeleting ? fullText.substring(0, text.length - 1) : fullText.substring(0, text.length + 1));
+      
+      setText(prev => 
+        isDeleting 
+          ? fullText.substring(0, prev.length - 1) 
+          : fullText.substring(0, prev.length + 1)
+      );
+
       setTypingSpeed(isDeleting ? 50 : 120);
-      if (!isDeleting && text === fullText) setTimeout(() => setIsDeleting(true), 2000);
-      else if (isDeleting && text === '') { setIsDeleting(false); setLoopNum(loopNum + 1); }
+
+      if (!isDeleting && text === fullText) {
+        setTimeout(() => setIsDeleting(true), 2000);
+      } else if (isDeleting && text === '') {
+        setIsDeleting(false);
+        setLoopNum(loopNum + 1);
+      }
     };
+
     const timer = setTimeout(handleTyping, typingSpeed);
     return () => clearTimeout(timer);
   }, [text, isDeleting, loopNum, typingSpeed, words]);
 
+  // Space Animations Logic
   useEffect(() => {
     const clock = setInterval(() => setTime(new Date().toLocaleTimeString()), 1000);
     
@@ -223,10 +241,10 @@ const Home = () => {
             padding-bottom: 50px;
           }
           .universe-container-mobile {
-            width: 320px !important;
-            height: 320px !important;
-            transform: scale(0.8);
-            margin-top: -50px;
+            width: 300px !important;
+            height: 300px !important;
+            transform: scale(0.85);
+            margin: 20px 0;
           }
           .profile-section-mobile {
             width: 90% !important;
@@ -254,7 +272,7 @@ const Home = () => {
         @keyframes drift { 0% { left: -30%; transform: rotate(0deg); } 100% { left: 130%; transform: rotate(360deg); } }
         @keyframes cometFlow { 0% { left: -20%; opacity: 0; } 20% { opacity: 1; } 100% { left: 130%; opacity: 0; } }
         @keyframes scanning { 0% { top: 0%; } 100% { top: 100%; } }
-        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { scale(1.5); opacity: 0; } }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
         @keyframes ufoPath {

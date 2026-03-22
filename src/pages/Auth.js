@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import { useNavigate } from 'react-router-dom'; // রিডাইরেক্টের জন্য যোগ করা হয়েছে
+import { useNavigate } from 'react-router-dom'; // রিডাইরেক্টের জন্য যোগ করা হয়েছে
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -8,7 +8,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate(); // রিডাইরেক্ট ফাংশন
 
-  // ইউজার আগে থেকেই লগইন করা থাকলে তাকে ড্যাশবোর্ডে পাঠিয়ে দেবে
+  // ইউজার আগে থেকেই লগইন করা থাকলে তাকে ড্যাশবোর্ডে পাঠিয়ে দেবে
   useEffect(() => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -18,6 +18,27 @@ const Auth = () => {
     };
     checkUser();
   }, [navigate]);
+
+  // --- নতুন সিস্টেম এড করা হয়েছে (প্রোফাইল টেবিল নিশ্চিত করার জন্য) ---
+  const ensureProfileExists = async (user) => {
+    if (!user) return;
+    const { data: existing } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .single();
+
+    if (!existing) {
+      await supabase.from('profiles').insert([
+        { 
+          id: user.id, 
+          full_name: user.user_metadata?.full_name || user.email.split('@')[0],
+          avatar_url: user.user_metadata?.avatar_url || null
+        }
+      ]);
+    }
+  };
+  // -------------------------------------------------------
 
   // গুগল লগইন ফাংশন
   const handleGoogleLogin = async () => {
@@ -44,6 +65,7 @@ const Auth = () => {
     if (error) {
       alert("Login Error: " + error.message);
     } else if (data.user) {
+      await ensureProfileExists(data.user); // প্রোফাইল চেক করবে
       alert("Login Successful!");
       navigate('/dashboard'); // সফল লগইনে ড্যাশবোর্ডে রিডাইরেক্ট
     }
@@ -68,10 +90,8 @@ const Auth = () => {
     if (error) {
       alert("Registration Error: " + error.message);
     } else if (data.user) {
-      // যদি Supabase-এ ইমেইল ভেরিফিকেশন অফ থাকে, তবে সরাসরি রিডাইরেক্ট হবে
+      await ensureProfileExists(data.user); // নতুন ইউজারের প্রোফাইল এন্ট্রি করবে
       alert("Registration Successful! Please check your email for confirmation.");
-      // ইমেইল ভেরিফিকেশন না থাকলে নিচের লাইনটি কমেন্ট আউট থেকে সরিয়ে দিন
-      // navigate('/dashboard'); 
     }
     setLoading(false);
   };
