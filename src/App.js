@@ -13,6 +13,7 @@ import Services from './pages/Services';
 import MyProjects from './pages/MyProjects'; 
 import ULMPersonal from './pages/ULMPersonal'; 
 import Auth from './pages/Auth'; 
+import Profile from './pages/Profile'; // প্রোফাইল পেজ ইম্পোর্ট
 
 // --- Loading Component ---
 const LoadingScreen = () => (
@@ -39,18 +40,26 @@ const LoadingScreen = () => (
 );
 
 // --- Navbar Component ---
-function Navbar({ setIsLoading }) {
+function Navbar({ setIsLoading, session }) {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const [dbUser, setDbUser] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
 
+  // ডাটাবেস থেকে ইউজারের আসল প্রোফাইল ডাটা নিয়ে আসা
   useEffect(() => {
-    const getUserData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+    const getProfile = async () => {
+      if (session?.user) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('full_name, avatar_url')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (data) setDbUser(data);
+      }
     };
-    getUserData();
+    getProfile();
 
     const handleResize = () => {
       const mobile = window.innerWidth <= 1024;
@@ -59,7 +68,7 @@ function Navbar({ setIsLoading }) {
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [session]);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -92,22 +101,24 @@ function Navbar({ setIsLoading }) {
     transition: '0.3s'
   });
 
-  // --- নতুন প্রিমিয়াম প্রোফাইল সেকশন ---
+  // --- ডাইনামিক প্রোফাইল সেকশন ---
   const UserProfile = () => (
-    <div style={styles.profileWrapper} title="User Profile">
-      <div style={styles.profileInfo}>
-        <span style={styles.userName}>{user?.user_metadata?.full_name || "Milon Islam"}</span>
-        <span style={styles.userStatus}>Online</span>
+    <Link to="/profile" onClick={handleNavLinkClick} style={{ textDecoration: 'none' }}>
+      <div style={styles.profileWrapper} title="View Profile">
+        <div style={styles.profileInfo}>
+          <span style={styles.userName}>{dbUser?.full_name || session?.user?.user_metadata?.full_name || "User"}</span>
+          <span style={styles.userStatus}>Online</span>
+        </div>
+        <div style={styles.avatarContainer}>
+          <img 
+            src={dbUser?.avatar_url || session?.user?.user_metadata?.avatar_url || "https://ui-avatars.com/api/?name=" + session?.user?.email} 
+            alt="Profile" 
+            style={styles.profilePic} 
+          />
+          <div style={styles.onlineBadge}></div>
+        </div>
       </div>
-      <div style={styles.avatarContainer}>
-        <img 
-          src={user?.user_metadata?.avatar_url || "https://ui-avatars.com/api/?name=" + (user?.user_metadata?.full_name || user?.email) + "&background=random"} 
-          alt="Profile" 
-          style={styles.profilePic} 
-        />
-        <div style={styles.onlineBadge}></div>
-      </div>
-    </div>
+    </Link>
   );
 
   return (
@@ -168,8 +179,7 @@ function Navbar({ setIsLoading }) {
           overflowY: isMobile ? 'auto' : 'visible'
         }}>
           
-          {/* মোবাইল মেনুর শীর্ষে প্রোফাইল */}
-          {isMobile && user && (
+          {isMobile && session && (
             <div style={{ padding: '0 20px 20px 20px', borderBottom: '1px solid #222', marginBottom: '10px' }}>
                <UserProfile />
             </div>
@@ -183,8 +193,7 @@ function Navbar({ setIsLoading }) {
           <Link to="/world-film" onClick={handleNavLinkClick} style={isMobile ? getMobileLinkStyle('#ff3c3c', '#8b0000') : getActiveStyle('/world-film', styles.worldFilmBtn)}>World Film</Link>
           <Link to="/contact" onClick={handleNavLinkClick} style={isMobile ? getMobileLinkStyle('#17a2b8', '#116a7b') : getActiveStyle('/contact', styles.contactBtn)}>Contact</Link>
           
-          {/* ডেস্কটপে লগআউটের আগে প্রোফাইল কার্ড */}
-          {!isMobile && user && <UserProfile />}
+          {!isMobile && session && <UserProfile />}
 
           <button onClick={handleLogout} style={isMobile ? getMobileLinkStyle('#ff4b2b', '#9e2a2a') : styles.logoutBtn}>
             Logout
@@ -195,8 +204,8 @@ function Navbar({ setIsLoading }) {
   );
 }
 
-// --- App Content (Protected Area) ---
-function AppContent() {
+// --- App Content ---
+function AppContent({ session }) {
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
 
@@ -209,13 +218,10 @@ function AppContent() {
   const getPageTheme = () => {
     switch (location.pathname) {
       case '/': return { bg: '#1a1a2e', card: '#16213e', border: '#61dafb' };
-      case '/personal': return { bg: '#250025', card: '#3d003d', border: '#e83e8c' };
+      case '/profile': return { bg: '#121212', card: '#1e1e1e', border: '#ffc107' };
       case '/about': return { bg: '#2d142c', card: '#510a32', border: '#c72c41' };
       case '/services': return { bg: '#0f3443', card: '#112d32', border: '#24fe41' };
       case '/projects': return { bg: '#1d1d1d', card: '#333333', border: '#28a745' };
-      case '/multimedia': return { bg: '#432371', card: '#2e1a47', border: '#faae7b' };
-      case '/world-film': return { bg: '#300000', card: '#600000', border: '#ff3c3c' };
-      case '/contact': return { bg: '#00416a', card: '#002a45', border: '#17a2b8' };
       default: return { bg: '#0a0a0a', card: '#161616', border: '#333' };
     }
   };
@@ -224,12 +230,13 @@ function AppContent() {
 
   return (
     <div style={{ backgroundColor: theme.bg, minHeight: '100vh', color: 'white', transition: 'background-color 0.8s ease' }}>
-      <Navbar setIsLoading={setIsLoading} />
+      <Navbar setIsLoading={setIsLoading} session={session} />
       {isLoading && <LoadingScreen />}
       <main style={{ padding: '15px', opacity: isLoading ? 0 : 1, transition: 'all 0.4s ease', display: 'flex', justifyContent: 'center' }}>
         <div style={{ background: theme.card, width: '100%', maxWidth: '1100px', padding: '25px', borderRadius: '12px', borderLeft: `6px solid ${theme.border}`, boxShadow: '0px 10px 40px rgba(0,0,0,0.6)', marginTop: '10px', boxSizing: 'border-box' }}>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/profile" element={<Profile session={session} />} />
             <Route path="/personal" element={<ULMPersonal />} />
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
@@ -264,11 +271,12 @@ export default function App() {
 
   return (
     <Router>
-      {!session ? <Auth /> : <AppContent />}
+      {!session ? <Auth /> : <AppContent session={session} />}
     </Router>
   );
 }
 
+// Styles remain the same as your provided code...
 const baseLinkStyle = { 
   color: 'white', textDecoration: 'none', fontSize: '11px', fontWeight: 'bold', 
   padding: '8px 10px', borderRadius: '6px', transition: 'all 0.3s ease'
@@ -286,7 +294,6 @@ const styles = {
   navLinks: { gap: '8px', display: 'flex', alignItems: 'center' },
   loadingContainer: { position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.95)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', zIndex: 9999 },
   
-  // বাটনের স্টাইল
   homeBtn: { ...baseLinkStyle, background: '#333' },
   aboutBtn: { ...baseLinkStyle, background: '#6f42c1' },
   servicesBtn: { ...baseLinkStyle, background: '#007bff' },
@@ -301,7 +308,6 @@ const styles = {
     boxShadow: '0 4px 12px rgba(255, 75, 43, 0.2)'
   },
 
-  // নতুন প্রোফাইল স্টাইল
   profileWrapper: {
     display: 'flex',
     alignItems: 'center',
@@ -311,7 +317,8 @@ const styles = {
     borderRadius: '50px',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     marginRight: '5px',
-    marginLeft: '10px'
+    marginLeft: '10px',
+    cursor: 'pointer'
   },
   profileInfo: {
     display: 'flex',
